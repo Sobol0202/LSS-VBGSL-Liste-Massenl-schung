@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LSS VBGSL-Liste Massenlöschung
 // @namespace    www.leitstellenspiel.de
-// @version      1.0
+// @version      1.1
 // @description  Ermöglicht das Löschen mehrerer VBGSL in der Liste
 // @author       MissSobol
 // @match        https://www.leitstellenspiel.de/custom_mission_alliance_list
@@ -20,12 +20,20 @@
             deleteButton.textContent = 'Ausgewählte Einsätze löschen';
             deleteButton.className = 'btn btn-danger';
             deleteButton.addEventListener('click', confirmDelete);
+
+            // Füge Checkbox zum Auswählen/Abwählen aller anderen Checkboxen hinzu
+            const selectAllCheckbox = document.createElement('input');
+            selectAllCheckbox.type = 'checkbox';
+            selectAllCheckbox.addEventListener('change', toggleAllCheckboxes);
+
             const lastCell = row.lastElementChild;
             lastCell.appendChild(deleteButton);
+            lastCell.appendChild(selectAllCheckbox);
         } else {
             // Füge Checkboxen in den übrigen Zeilen hinzu
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
+            checkbox.classList.add('einsatz-checkbox'); // Füge eine Klasse hinzu, um die Checkboxen als Einsatz zu identifizieren
             const lastCell = row.lastElementChild;
             lastCell.appendChild(checkbox);
         }
@@ -33,7 +41,7 @@
 
     // Funktion zur Bestätigung des Löschvorgangs
     function confirmDelete() {
-        const checkboxes = document.querySelectorAll('#personal_table input[type="checkbox"]');
+        const checkboxes = document.querySelectorAll('#personal_table input.einsatz-checkbox[type="checkbox"]');
         const selectedEinsaetze = Array.from(checkboxes).filter(checkbox => checkbox.checked);
 
         if (selectedEinsaetze.length === 0) {
@@ -50,7 +58,7 @@
 
     // Funktion zum Löschen ausgewählter Einsätze
     function deleteSelected() {
-        const checkboxes = document.querySelectorAll('#personal_table input[type="checkbox"]');
+        const checkboxes = document.querySelectorAll('#personal_table input.einsatz-checkbox[type="checkbox"]');
         const selectedEinsaetze = Array.from(checkboxes).filter(checkbox => checkbox.checked);
 
         let index = 0;
@@ -85,5 +93,17 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Funktion zum Auswählen/Abwählen aller anderen Checkboxen
+    function toggleAllCheckboxes() {
+        const selectAllCheckbox = this;
+        const checkboxes = document.querySelectorAll('#personal_table input.einsatz-checkbox[type="checkbox"]');
+
+        checkboxes.forEach(checkbox => {
+            if (checkbox !== selectAllCheckbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+        });
     }
 })();
